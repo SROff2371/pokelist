@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Pokémon</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 800px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+        }
+        .pokemon-image {
+            width: 60px;
+        }
+        .hidden { display: none; }
+        .rounded-left {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        .rounded-right {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .buttons-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .buttons-container button {
+            border: none;
+            padding: 12px 20px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .buttons-container button:hover {
+            opacity: 0.8;
+        }
+        .blue-button {
+            background-color: #007bff;
+        }
+        .blue-button:hover {
+            background-color: #0056b3;
+        }
+        .green-button {
+            background-color: #28a745;
+        }
+        .green-button:hover {
+            background-color: #218838;
+        }
+        .red-button {
+            background-color: #dc3545;
+        }
+        .red-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Liste des Pokémon</h1>
+    <div id="login-container">
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="login()">Se connecter</button>
+    </div>
+    <div class="container hidden" id="content">
+        <input type="text" class="search-bar" id="search" placeholder="Rechercher un Pokémon ou un numéro..." oninput="searchPokemons()">
+        
+        <!-- Les statistiques ici, juste après la barre de recherche -->
+        <div class="stats">
+            <p><strong>Total :</strong> <span id="total-count">0</span></p>
+            <p><strong>Cocher :</strong> <span id="checked-count">0</span></p>
+            <p><strong>En attente :</strong> <span id="unchecked-count">0</span></p>
+        </div>
+
+        <div class="buttons-container">
+            <button class="blue-button" onclick="filterPokemon('all')">Afficher Tout</button>
+            <button class="green-button" onclick="filterPokemon('checked')">Déjà ajoutés ✅</button>
+            <button class="red-button" onclick="filterPokemon('unchecked')">En attente ❌</button>
+        </div>
+
+        <div id="pokemon-tables"></div>
+    </div>
+    <script>
+        // JavaScript reste inchangé
+    </script>
+</body>
+
+    <script>
+        let currentUser = null;
+        let allPokemons = [];
+
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if ((username === "_SR_Off_" && password === "Klim35700132.") || (username === "invite" && password === "invite")) {
+                currentUser = username;
+                document.getElementById("login-container").classList.add("hidden");
+                document.getElementById("content").classList.remove("hidden");
+                loadPokemonTables();
+            } else {
+                alert("Identifiants incorrects");
+            }
+        }
+
+        async function fetchAndDisplayPokemon(apiUrl, generation) {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                let pokemonList = [];
+
+                for (const pokemonEntry of data.pokemon_species) {
+                    const pokemonUrl = pokemonEntry.url;
+                    const pokemonResponse = await fetch(pokemonUrl);
+                    const pokemonData = await pokemonResponse.json();
+
+                    const pokedexNumber = pokemonData.id;
+                    const pokemonNameFR = pokemonData.names.find(n => n.language.name === "fr")?.name || pokemonData.name;
+                    const pokemonNameEN = pokemonData.names.find(n => n.language.name === "en")?.name || pokemonData.name;
+                    const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokedexNumber}.png`;
+
+                    pokemonList.push({ pokedexNumber, pokemonNameFR, pokemonNameEN, imageUrl });
+                }
+
+                pokemonList.sort((a, b) => a.pokedexNumber - b.pokedexNumber);
+
+                let tableHtml = `<h2>${generation}ᵉ Génération</h2>
+                    <table>
+                    <thead>
+                        <tr>
+                            <th class='rounded-left'>✔️/❌</th>
+                            <th>Image</th>
+                            <th>Numéro</th>
+                            <th>Nom (FR)</th>
+                            <th class='rounded-right'>Nom (EN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                pokemonList.forEach(pokemon => {
+                    const isChecked = localStorage.getItem(`pokemon-${pokemon.pokedexNumber}`) === "true";
+                    let checkboxOrSymbol = currentUser === "_SR_Off_" 
+                        ? `<input type='checkbox' class='pokemon-checkbox rounded-left' data-id='${pokemon.pokedexNumber}' ${isChecked ? "checked" : ""}>`
+                        : (isChecked ? "✅" : "❌");
+
+                    tableHtml += `
+                        <tr class='pokemon-row' data-name-fr='${pokemon.pokemonNameFR.toLowerCase()}' data-name-en='${pokemon.pokemonNameEN.toLowerCase()}' data-id='${pokemon.pokedexNumber}'>
+                            <td>${checkboxOrSymbol}</td>
+                            <td><img src="${pokemon.imageUrl}" class="pokemon-image" alt="${pokemon.pokemonNameFR}"></td>
+                            <td>${pokemon.pokedexNumber}</td>
+                            <td>${pokemon.pokemonNameFR}</td>
+                            <td class='rounded-right'>${pokemon.pokemonNameEN}</td>
+                        </tr>`;
+                });
+
+                tableHtml += `</tbody></table>`;
+                document.getElementById("pokemon-tables").innerHTML += tableHtml;
+                allPokemons = pokemonList;
+
+                updateCheckboxCounts();
+
+                if (currentUser === "_SR_Off_") {
+                    document.querySelectorAll(".pokemon-checkbox").forEach(checkbox => {
+                        checkbox.addEventListener("change", function () {
+                            const pokemonId = this.getAttribute("data-id");
+                            localStorage.setItem(`pokemon-${pokemonId}`, this.checked ? "true" : "false");
+                            updateCheckboxCounts();
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error(`Erreur lors de la récupération des données :`, error);
+            }
+        }
+
+        function loadPokemonTables() {
+            document.getElementById("pokemon-tables").innerHTML = "";
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/2", 2);
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/3", 3);
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/4", 4);
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/5", 5);
+        }
+
+        function updateCheckboxCounts() {
+            const totalCount = document.querySelectorAll(".pokemon-row").length;
+            let checkedCount = 0;
+            let uncheckedCount = 0;
+
+            document.querySelectorAll(".pokemon-row").forEach(row => {
+                const pokemonId = row.getAttribute("data-id");
+                const isChecked = localStorage.getItem(`pokemon-${pokemonId}`) === "true";
+                
+                if (isChecked) {
+                    checkedCount++;
+                } else {
+                    uncheckedCount++;
+                }
+            });
+
+            // Mise à jour des éléments affichant les comptes
+            document.getElementById("total-count").textContent = totalCount;
+            document.getElementById("checked-count").textContent = checkedCount;
+            document.getElementById("unchecked-count").textContent = uncheckedCount;
+        }
+
+        function searchPokemons() {
+            const searchTerm = document.getElementById("search").value.toLowerCase();
+            document.querySelectorAll(".pokemon-row").forEach(row => {
+                const nameFR = row.getAttribute("data-name-fr");
+                const nameEN = row.getAttribute("data-name-en");
+                const pokedexNumber = row.getAttribute("data-id");
+
+                if (nameFR.includes(searchTerm) || nameEN.includes(searchTerm) || pokedexNumber.includes(searchTerm)) {
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            });
+        }
+
+        function filterPokemon(type) {
+            document.querySelectorAll(".pokemon-row").forEach(row => {
+                const pokemonId = row.getAttribute("data-id");
+                const isChecked = localStorage.getItem(`pokemon-${pokemonId}`) === "true";
+
+                if (type === "checked" && !isChecked) {
+                    row.classList.add("hidden");
+                } else if (type === "unchecked" && isChecked) {
+                    row.classList.add("hidden");
+                } else {
+                    row.classList.remove("hidden");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

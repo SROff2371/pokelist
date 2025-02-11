@@ -1,0 +1,12 @@
+{
+  "name": "my-pokemon-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",  // Pour tester en local
+    "start": "vercel start" // Pour démarrer l'application
+  },
+  "dependencies": {
+    "express": "^4.17.1"   // Si tu utilises Express pour l'API
+  }
+}

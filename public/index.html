@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Pokémon</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Liste des Pokémon</h1>
+    <div id="login-container">
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="login()">Se connecter</button>
+    </div>
+    <div class="container hidden" id="content">
+        <input type="text" class="search-bar" id="search" placeholder="Rechercher un Pokémon ou un numéro..." oninput="searchPokemons()">
+        
+        <div class="stats">
+            <p><strong>Total :</strong> <span id="total-count">0</span></p>
+            <p><strong>Cocher :</strong> <span id="checked-count">0</span></p>
+            <p><strong>En attente :</strong> <span id="unchecked-count">0</span></p>
+        </div>
+
+        <div class="buttons-container">
+            <button class="blue-button" onclick="filterPokemon('all')">Afficher Tout</button>
+            <button class="green-button" onclick="filterPokemon('checked')">Déjà ajoutés ✅</button>
+            <button class="red-button" onclick="filterPokemon('unchecked')">En attente ❌</button>
+        </div>
+
+        <div id="pokemon-tables"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
