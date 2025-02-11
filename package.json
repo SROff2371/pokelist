@@ -1,12 +1,15 @@
 {
   "name": "my-pokemon-app",
   "version": "1.0.0",
+  "description": "Une application pour gérer des Pokémon",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel start"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.17.1"
-  }
+  },
+  "devDependencies": {},
+  "author": "Ton Nom",
+  "license": "MIT"
 }
