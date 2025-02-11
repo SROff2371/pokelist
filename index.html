@@ -118,7 +118,6 @@
     <div class="container hidden" id="content">
         <input type="text" class="search-bar" id="search" placeholder="Rechercher un Pokémon ou un numéro..." oninput="searchPokemons()">
         
-        <!-- Les statistiques ici, juste après la barre de recherche -->
         <div class="stats">
             <p><strong>Total :</strong> <span id="total-count">0</span></p>
             <p><strong>Cocher :</strong> <span id="checked-count">0</span></p>
@@ -133,10 +132,6 @@
 
         <div id="pokemon-tables"></div>
     </div>
-    <script>
-        // JavaScript reste inchangé
-    </script>
-</body>
 
     <script>
         let currentUser = null;
@@ -161,6 +156,8 @@
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 let pokemonList = [];
+
+                console.log(`Données pour la génération ${generation}:`, data); // Log pour voir les données reçues
 
                 for (const pokemonEntry of data.pokemon_species) {
                     const pokemonUrl = pokemonEntry.url;
@@ -229,8 +226,8 @@
         function loadPokemonTables() {
             document.getElementById("pokemon-tables").innerHTML = "";
             fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/2", 2);
-            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/3", 3);
-            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/4", 4);
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/3", 4);
+            fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/4", 3);
             fetchAndDisplayPokemon("https://pokeapi.co/api/v2/generation/5", 5);
         }
 
@@ -250,7 +247,6 @@
                 }
             });
 
-            // Mise à jour des éléments affichant les comptes
             document.getElementById("total-count").textContent = totalCount;
             document.getElementById("checked-count").textContent = checkedCount;
             document.getElementById("unchecked-count").textContent = uncheckedCount;
